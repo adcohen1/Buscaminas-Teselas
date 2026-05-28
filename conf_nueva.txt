@@ -1,0 +1,32 @@
+dist=(10, 10)
+
+color_celda=(0, 0, 255)
+
+color_bomba=(255, 0, 0)
+
+color_bg=(60, 120, 180)
+color_texto=(192, 192, 192)
+dist=(10, 10)
+
+color_celda=(0, 0, 255)
+
+color_bomba=(255, 0, 0)
+
+color_bg=(60, 120, 180)
+color_texto=(192, 192, 192)
+dist=(10, 10)
+
+color_celda=(0, 0, 255)
+
+color_bomba=(255, 0, 0)
+
+color_bg=(60, 120, 180)
+color_texto=(192, 192, 192)
+dist=(60, 120, 180)
+color_celda=(0, 0, 255)
+
+color_bomba=(255, 0, 0)
+
+color_bg=(0, 0, 0)
+
+color_texto=(192, 192, 192)

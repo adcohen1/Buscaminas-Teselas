@@ -1,0 +1,31 @@
+{
+    "filas": 2,
+    "columnas": 2,
+    "bombas": 15,
+    "tama\u00f1o_celda": 333,
+    "separacion_celdas": 10,
+    "margen_tablero": 20,
+    "padding_tablero": 20,
+    "color_fondo": [
+        0,
+        120,
+        0
+    ],
+    "color_celda": [
+        248,
+        244,
+        223
+    ],
+    "color_bomba": [
+        255,
+        0,
+        0
+    ],
+    "color_tablero": [
+        0,
+        100,
+        10
+    ],
+    "ancho_pantalla": 1920,
+    "alto_pantalla": 1080
+}
