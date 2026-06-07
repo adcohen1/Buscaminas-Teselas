@@ -1,10 +1,20 @@
-from pygame import Surface
+from pygame import Surface, font
 from pygame.sprite import Sprite
 
 import observador as obs
 from adminconf import AdminConf
 
 config = AdminConf()
+_fuente = None
+
+
+def obtener_fuente():
+    global _fuente
+    if _fuente is None:
+        if not font.get_init():
+            font.init()
+        _fuente = font.SysFont("Arial", 30)
+    return _fuente
 
 
 class Celda(obs.Observador, Sprite):
@@ -34,6 +44,13 @@ class Celda(obs.Observador, Sprite):
             return
         self.estaAbierta = True
         self.image.fill(config.color_tablero)
+        if self.minasAdj > 0:
+            numero = obtener_fuente().render(str(self.minasAdj), True, (255, 255, 255))
+            numero_rect = numero.get_rect(center=(self.image.get_width() // 2, self.image.get_height() // 2))
+            self.image.blit(numero, numero_rect)
+        else:
+            # Si es 0, no dibujamos número
+            pass
         if self.minasAdj != 0:
             return
         for celda in self.celdasAdj:
