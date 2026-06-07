@@ -2,7 +2,7 @@
     "filas": 2,
     "columnas": 2,
     "bombas": 15,
-    "tama\u00f1o_celda": 333,
+    "tama\u00f1o_celda": 206,
     "separacion_celdas": 10,
     "margen_tablero": 20,
     "padding_tablero": 20,
@@ -26,6 +26,6 @@
         100,
         10
     ],
-    "ancho_pantalla": 1920,
-    "alto_pantalla": 1080
+    "ancho_pantalla": 1280,
+    "alto_pantalla": 720
 }

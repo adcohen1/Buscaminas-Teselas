@@ -1,5 +1,7 @@
-import threading as thr
+import os
+import ctypes
 
+import threading as thr
 import pygame as pg
 
 import adminconf as ac
@@ -7,16 +9,29 @@ import boton as btn
 import constantes as c
 import tablero as t
 
+# Hacer que la aplicación sea consciente del DPI en Windows para evitar que se cambie la resolución del monitor o se estire
+try:
+    ctypes.windll.shcore.SetProcessDpiAwareness(2)  # PROCESS_PER_MONITOR_DPI_AWARE
+except Exception:
+    try:
+        ctypes.windll.user32.SetProcessDPIAware()
+    except Exception:
+        pass
+
+os.environ["SDL_VIDEO_CENTERED"] = "1"
+
 pg.init()
 conf = ac.AdminConf()
 
 info = pg.display.Info()
 
-conf.ancho_pantalla = info.current_w
-conf.alto_pantalla = info.current_h
+conf.ancho_pantalla = int(info.current_w * 2 / 3)
+conf.alto_pantalla = int(info.current_h * 2 / 3)
+
+orientacion = "vertical" if conf.ancho_pantalla < conf.alto_pantalla else "horizontal"
 
 # lienzo
-canva = pg.display.set_mode((conf.ancho_pantalla, conf.alto_pantalla))
+canva = pg.display.set_mode((conf.ancho_pantalla, conf.alto_pantalla), pg.RESIZABLE)
 bg_color = conf.color_fondo
 
 # texto
@@ -55,9 +70,42 @@ while run:
     for evt in pg.event.get():
         if evt.type == pg.QUIT:
             run = False
+        elif evt.type == pg.VIDEORESIZE:
+            # Actualizar dimensiones en la configuracion
+            conf.ancho_pantalla = evt.size[0]
+            conf.alto_pantalla = evt.size[1]
+            # Solo recrear el lienzo si no está en pantalla completa (NOFRAME)
+            es_fullscreen = bool(pg.display.get_surface().get_flags() & pg.NOFRAME)
+            if not es_fullscreen:
+                canva = pg.display.set_mode(
+                    (conf.ancho_pantalla, conf.alto_pantalla), pg.RESIZABLE
+                )
+            # Recalcular el tamaño de las celdas
+            tablero.actualizar()
+
         elif evt.type == pg.KEYUP:
             if evt.key == pg.K_ESCAPE:
                 run = False
+            elif evt.key == pg.K_f:
+                es_fullscreen = bool(pg.display.get_surface().get_flags() & pg.NOFRAME)
+                if not es_fullscreen:
+                    # Ir a pantalla completa borderless usando NOFRAME (evita parpadeos y cambios de resolución física)
+                    conf.ancho_pantalla = info.current_w
+                    conf.alto_pantalla = info.current_h
+                    canva = pg.display.set_mode(
+                        (conf.ancho_pantalla, conf.alto_pantalla), pg.NOFRAME
+                    )
+                else:
+                    # Volver a ventana (2/3 de pantalla) y centrarla
+                    conf.ancho_pantalla = int(info.current_w * 2 / 3)
+                    conf.alto_pantalla = int(info.current_h * 2 / 3)
+                    x = (info.current_w - conf.ancho_pantalla) // 2
+                    y = (info.current_h - conf.alto_pantalla) // 2
+                    os.environ["SDL_VIDEO_WINDOW_POS"] = f"{x},{y}"
+                    canva = pg.display.set_mode(
+                        (conf.ancho_pantalla, conf.alto_pantalla), pg.RESIZABLE
+                    )
+                tablero.actualizar()
         elif evt.type == pg.MOUSEBUTTONUP:
             if bots.rect.collidepoint(evt.pos):
                 hilo = thr.Thread(

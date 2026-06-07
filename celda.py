@@ -8,7 +8,6 @@ config = AdminConf()
 
 
 class Celda(obs.Observador, Sprite):
-
     def __init__(self, lado, xpos, ypos, color):
         super().__init__()
 
@@ -25,11 +24,9 @@ class Celda(obs.Observador, Sprite):
         self.estaMarcada = False
         self.estaAbierta = False
 
-    def actualizar(self):
-        ...
+    def actualizar(self): ...
 
-    def contarAdyacentes(self):
-        ...
+    def contarAdyacentes(self): ...
 
     def accionar(self):
         if self.esMina:
