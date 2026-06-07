@@ -41,6 +41,8 @@ class Celda(obs.Observador, Sprite):
     def accionar(self):
         if self.estaAbierta:
             return False
+        if self.estaMarcada:
+            return False
         if self.esMina:
             self.explotar()
             return True

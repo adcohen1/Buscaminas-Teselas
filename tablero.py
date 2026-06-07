@@ -19,6 +19,7 @@ class Tablero(obs.Observador):
         self.celdas = sprite.Group()
         self.celdas_mat = []
         self.estado = "JUGANDO"
+        self.minas_creadas = False
 
     def revelar_minas(self):
         for fila in self.celdas_mat:
@@ -78,8 +79,37 @@ class Tablero(obs.Observador):
                 self.celdas.add(cel)
                 fila_celdas.append(cel)
             self.celdas_mat.append(fila_celdas)
-        self.minar()
         self.crearAdyacentes()
+        self.minas_creadas = False
+
+    def generar_minas(self, celda_inicial):
+        # 1. Identificar las celdas excluidas (la inicial y sus vecinas)
+        excluidas = {celda_inicial}
+        for vecino in celda_inicial.celdasAdj:
+            excluidas.add(vecino)
+
+        # 2. Obtener lista de celdas disponibles
+        disponibles = [
+            cel
+            for fila in self.celdas_mat
+            for cel in fila
+            if cel not in excluidas
+        ]
+
+        # 3. Colocar las minas de forma aleatoria
+        num_bombas = min(config.bombas, len(disponibles))
+        ran.shuffle(disponibles)
+        for i in range(num_bombas):
+            disponibles[i].esMina = True
+
+        # 4. Recalcular las minas adyacentes para todas las celdas
+        for fila in self.celdas_mat:
+            for cel in fila:
+                cel.minasAdj = sum(
+                    [1 for vecino in cel.celdasAdj if vecino.esMina]
+                )
+
+        self.minas_creadas = True
 
     def minar(self):
         sprites = self.celdas.sprites()
