@@ -1,8 +1,8 @@
 {
-    "filas": 2,
-    "columnas": 2,
+    "filas": 10,
+    "columnas": 12,
     "bombas": 15,
-    "tama\u00f1o_celda": 206,
+    "tama\u00f1o_celda": 33,
     "separacion_celdas": 10,
     "margen_tablero": 20,
     "padding_tablero": 20,

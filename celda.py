@@ -33,6 +33,12 @@ class Celda(obs.Observador, Sprite):
             self.explotar()
             return
         self.estaAbierta = True
+        self.image.fill(config.color_tablero)
+        if self.minasAdj != 0:
+            return
+        for celda in self.celdasAdj:
+            if not celda.estaAbierta:
+                celda.accionar()
 
     def marcar(self):
         if self.estaMarcada:
@@ -41,8 +47,7 @@ class Celda(obs.Observador, Sprite):
         self.estaMarcada = True
 
     def explotar(self):
-        if self.esMina:
-            self.color = config.color_celda
+        self.image.fill(config.color_bomba)
 
 
 def calcularLado(rp):

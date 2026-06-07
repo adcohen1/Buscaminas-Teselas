@@ -86,6 +86,8 @@ while run:
         elif evt.type == pg.KEYUP:
             if evt.key == pg.K_ESCAPE:
                 run = False
+
+            # Alternar pantalla completa usando NOFRAME (evita parpadeos y cambios de resolución física)
             elif evt.key == pg.K_f:
                 es_fullscreen = bool(pg.display.get_surface().get_flags() & pg.NOFRAME)
                 if not es_fullscreen:
@@ -138,6 +140,12 @@ while run:
                 )
                 hilo.start()
                 # conf.columnas-= 1
+
+            else:
+                for celda in tablero.celdas:
+                    if celda.rect.collidepoint(evt.pos):
+                        celda.accionar()
+                        break
 
     # bot.image.fill(bot.color)
     canva.fill(bg_color)
