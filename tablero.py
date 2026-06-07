@@ -144,8 +144,10 @@ class Tablero(obs.Observador):
             cel for fila in self.celdas_mat for cel in fila if cel not in excluidas
         ]
 
-        # 3. Colocar las minas de forma aleatoria
-        num_bombas = min(config.bombas, len(disponibles))
+        # 3. Colocar las minas de forma aleatoria (config.bombas es el porcentaje, ej. 20 para 20%)
+        total_celdas = config.filas * config.columnas
+        num_bombas_deseadas = max(1 if config.bombas > 0 else 0, int(total_celdas * (config.bombas / 100.0)))
+        num_bombas = min(num_bombas_deseadas, len(disponibles))
         ran.shuffle(disponibles)
         for i in range(num_bombas):
             disponibles[i].esMina = True
@@ -161,7 +163,11 @@ class Tablero(obs.Observador):
         sprites = self.celdas.sprites()
         ran.shuffle(sprites)
 
-        for i in range(config.bombas):
+        total_celdas = config.filas * config.columnas
+        num_bombas_deseadas = max(1 if config.bombas > 0 else 0, int(total_celdas * (config.bombas / 100.0)))
+        num_bombas = min(num_bombas_deseadas, len(sprites))
+
+        for i in range(num_bombas):
             sprites[i].esMina = True
 
     def crearAdyacentes(self):
