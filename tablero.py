@@ -18,6 +18,20 @@ class Tablero(obs.Observador):
         self.color = config.color_tablero
         self.celdas = sprite.Group()
         self.celdas_mat = []
+        self.estado = "JUGANDO"
+
+    def revelar_minas(self):
+        for fila in self.celdas_mat:
+            for cel in fila:
+                if cel.esMina:
+                    cel.explotar()
+
+    def verificar_victoria(self):
+        for fila in self.celdas_mat:
+            for cel in fila:
+                if not cel.esMina and not cel.estaAbierta:
+                    return False
+        return True
 
     def actualizar(self):
         self.calcularTamaño()

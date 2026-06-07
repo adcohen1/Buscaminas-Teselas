@@ -13,7 +13,7 @@ def obtener_fuente():
     if _fuente is None:
         if not font.get_init():
             font.init()
-        _fuente = font.SysFont("Arial", 30)
+        _fuente = font.SysFont("timesnewroman", 30)
     return _fuente
 
 
@@ -39,29 +39,44 @@ class Celda(obs.Observador, Sprite):
     def contarAdyacentes(self): ...
 
     def accionar(self):
+        if self.estaAbierta:
+            return False
         if self.esMina:
             self.explotar()
-            return
+            return True
         self.estaAbierta = True
         self.image.fill(config.color_tablero)
         if self.minasAdj > 0:
             numero = obtener_fuente().render(str(self.minasAdj), True, (255, 255, 255))
-            numero_rect = numero.get_rect(center=(self.image.get_width() // 2, self.image.get_height() // 2))
+            numero_rect = numero.get_rect(
+                center=(self.image.get_width() // 2, self.image.get_height() // 2)
+            )
             self.image.blit(numero, numero_rect)
         else:
             # Si es 0, no dibujamos número
             pass
         if self.minasAdj != 0:
-            return
+            return False
         for celda in self.celdasAdj:
             if not celda.estaAbierta:
                 celda.accionar()
+        return False
 
     def marcar(self):
+        if self.estaAbierta:
+            return
         if self.estaMarcada:
             self.estaMarcada = False
-            return
-        self.estaMarcada = True
+            self.image.fill(self.color)
+        else:
+            self.estaMarcada = True
+            self.image.fill((230, 80, 80))
+            fuente = obtener_fuente()
+            bandera = fuente.render("P", True, (255, 255, 255))
+            bandera_rect = bandera.get_rect(
+                center=(self.image.get_width() // 2, self.image.get_height() // 2)
+            )
+            self.image.blit(bandera, bandera_rect)
 
     def explotar(self):
         self.image.fill(config.color_bomba)

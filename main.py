@@ -86,6 +86,9 @@ while run:
         elif evt.type == pg.KEYUP:
             if evt.key == pg.K_ESCAPE:
                 run = False
+            elif evt.key == pg.K_r:
+                tablero.actualizar()
+                tablero.estado = "JUGANDO"
 
             # Alternar pantalla completa usando NOFRAME (evita parpadeos y cambios de resolución física)
             elif evt.key == pg.K_f:
@@ -142,10 +145,18 @@ while run:
                 # conf.columnas-= 1
 
             else:
-                for celda in tablero.celdas:
-                    if celda.rect.collidepoint(evt.pos):
-                        celda.accionar()
-                        break
+                if tablero.estado == "JUGANDO":
+                    for celda in tablero.celdas:
+                        if celda.rect.collidepoint(evt.pos):
+                            if evt.button == 1: # Clic izquierdo
+                                if celda.accionar():
+                                    tablero.estado = "DERROTA"
+                                    tablero.revelar_minas()
+                                elif tablero.verificar_victoria():
+                                    tablero.estado = "VICTORIA"
+                            elif evt.button == 3: # Clic derecho
+                                celda.marcar()
+                            break
 
     # bot.image.fill(bot.color)
     canva.fill(bg_color)
@@ -161,6 +172,38 @@ while run:
     canva.fill(bots.color, bots.rect)
     canva.fill(bots.color, botr2.rect)
     canva.fill(bots.color, botr.rect)
+
+    if tablero.estado != "JUGANDO":
+        overlay = pg.Surface((conf.ancho_pantalla, conf.alto_pantalla), pg.SRCALPHA)
+        overlay.fill((15, 23, 42, 200))
+        
+        ancho_box = 450
+        alto_box = 220
+        box_x = (conf.ancho_pantalla - ancho_box) // 2
+        box_y = (conf.alto_pantalla - alto_box) // 2
+        pg.draw.rect(overlay, (30, 41, 59, 240), (box_x, box_y, ancho_box, alto_box), border_radius=15)
+        pg.draw.rect(overlay, (71, 85, 105, 255), (box_x, box_y, ancho_box, alto_box), width=3, border_radius=15)
+        
+        fuente_titulo = pg.font.SysFont("Arial", 40, bold=True)
+        fuente_sub = pg.font.SysFont("Arial", 22)
+        
+        if tablero.estado == "DERROTA":
+            texto_titulo = "¡GAME OVER!"
+            color_titulo = (239, 68, 68)
+        else:
+            texto_titulo = "¡VICTORIA!"
+            color_titulo = (234, 179, 8)
+            
+        render_titulo = fuente_titulo.render(texto_titulo, True, color_titulo)
+        render_sub = fuente_sub.render("Presiona 'R' para jugar de nuevo", True, (241, 245, 249))
+        
+        rect_titulo = render_titulo.get_rect(center=(conf.ancho_pantalla // 2, conf.alto_pantalla // 2 - 30))
+        rect_sub = render_sub.get_rect(center=(conf.ancho_pantalla // 2, conf.alto_pantalla // 2 + 40))
+        
+        overlay.blit(render_titulo, rect_titulo)
+        overlay.blit(render_sub, rect_sub)
+        
+        canva.blit(overlay, (0, 0))
 
     pg.display.flip()
     reloj.tick(c.FPS)
