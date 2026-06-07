@@ -50,10 +50,13 @@ class AdminConf(Admin):
     def __init__(self):
         self.leerConf()
 
+    _sin_notificar = {"ancho_pantalla", "alto_pantalla", "tamaño_celda"}
+
     def __setattr__(self, atributo, valor):
         if getattr(self, atributo, None) != valor:
             super().__setattr__(atributo, valor)
-            self.cambiarConf()
+            if atributo not in self._sin_notificar:
+                self.cambiarConf()
 
     def agregar(self, observador):
         self._observadores.append(observador)

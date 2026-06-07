@@ -38,6 +38,57 @@ class Tablero(obs.Observador):
         self.calcularTamaño()
         self.calcularCeldas()
 
+    def reposicionar(self):
+        """Recalcular tamaño y posición de celdas existentes sin reiniciar el juego."""
+        self.calcularTamaño()
+        if not self.celdas_mat:
+            return
+
+        lado = celda.calcularLado(self.rect)
+        fil = config.filas
+        col = config.columnas
+        sep = config.separacion_celdas
+        pad = config.padding_tablero
+        config.tamaño_celda = lado
+        config.cambiarConf(notify=False)
+
+        yspace = config.alto_pantalla / 2 - (pad + sep + fil * (lado + sep)) / 2
+        xspace = config.ancho_pantalla / 2 - (pad + sep + col * (lado + sep)) / 2
+
+        for i in range(fil):
+            for j in range(col):
+                cel = self.celdas_mat[i][j]
+                xpos = xspace + pad + j * (lado + sep)
+                ypos = yspace + pad + i * (lado + sep)
+
+                # Recrear la superficie con el nuevo tamaño y redibujar el estado visual
+                cel.image = celda.Surface((lado, lado))
+                if cel.estaAbierta:
+                    cel.image.fill(config.color_tablero)
+                    if cel.esMina:
+                        cel.image.fill(config.color_bomba)
+                    elif cel.minasAdj > 0:
+                        numero = celda.obtener_fuente().render(str(cel.minasAdj), True, (255, 255, 255))
+                        numero_rect = numero.get_rect(
+                            center=(cel.image.get_width() // 2, cel.image.get_height() // 2)
+                        )
+                        cel.image.blit(numero, numero_rect)
+                elif cel.estaMarcada:
+                    cel.image.fill((230, 80, 80))
+                    fuente = celda.obtener_fuente()
+                    bandera = fuente.render("P", True, (255, 255, 255))
+                    bandera_rect = bandera.get_rect(
+                        center=(cel.image.get_width() // 2, cel.image.get_height() // 2)
+                    )
+                    cel.image.blit(bandera, bandera_rect)
+                elif cel.estaExplotada:
+                    cel.image.fill(config.color_bomba)
+                else:
+                    cel.image.fill(cel.color)
+
+                cel.rect = cel.image.get_rect()
+                cel.rect.center = (xpos + lado / 2, ypos + lado / 2)
+
     def calcularTamaño(self):
         margen = config.margen_tablero
 
@@ -90,10 +141,7 @@ class Tablero(obs.Observador):
 
         # 2. Obtener lista de celdas disponibles
         disponibles = [
-            cel
-            for fila in self.celdas_mat
-            for cel in fila
-            if cel not in excluidas
+            cel for fila in self.celdas_mat for cel in fila if cel not in excluidas
         ]
 
         # 3. Colocar las minas de forma aleatoria
@@ -105,9 +153,7 @@ class Tablero(obs.Observador):
         # 4. Recalcular las minas adyacentes para todas las celdas
         for fila in self.celdas_mat:
             for cel in fila:
-                cel.minasAdj = sum(
-                    [1 for vecino in cel.celdasAdj if vecino.esMina]
-                )
+                cel.minasAdj = sum([1 for vecino in cel.celdasAdj if vecino.esMina])
 
         self.minas_creadas = True
 

@@ -33,6 +33,7 @@ class Celda(obs.Observador, Sprite):
         self.esMina = False
         self.estaMarcada = False
         self.estaAbierta = False
+        self.estaExplotada = False
 
     def actualizar(self): ...
 
@@ -81,6 +82,7 @@ class Celda(obs.Observador, Sprite):
             self.image.blit(bandera, bandera_rect)
 
     def explotar(self):
+        self.estaExplotada = True
         self.image.fill(config.color_bomba)
 
 

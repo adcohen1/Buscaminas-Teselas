@@ -48,7 +48,7 @@ reloj = pg.time.Clock()
 
 # control
 
-prueba = "No"
+# prueba = "No"
 
 run = True
 r_presionado = False
@@ -84,7 +84,7 @@ while run:
                     (conf.ancho_pantalla, conf.alto_pantalla), pg.RESIZABLE
                 )
             # Recalcular el tamaño de las celdas
-            tablero.actualizar()
+            tablero.reposicionar()
 
         elif evt.type == pg.KEYDOWN:
             if evt.key == pg.K_r and not r_presionado:
@@ -126,7 +126,7 @@ while run:
                     canva = pg.display.set_mode(
                         (conf.ancho_pantalla, conf.alto_pantalla), pg.RESIZABLE
                     )
-                tablero.actualizar()
+                tablero.reposicionar()
         elif evt.type == pg.MOUSEBUTTONUP:
             if bots.rect.collidepoint(evt.pos):
                 hilo = thr.Thread(
@@ -180,11 +180,11 @@ while run:
     canva.fill(bg_color)
     tablero.dibujar(canva)
 
-    prueba = str(
-        f"filas: {conf.filas} columnas: {conf.columnas}, celdas: {conf.filas * conf.columnas}"
-    )
-    escribir(f"lado : {conf.tamaño_celda}, {prueba}", 100, 100)
-    escribir(f"FPS: {int(reloj.get_fps())}", 100, 140)
+    # prueba = str(
+    #     f"filas: {conf.filas} columnas: {conf.columnas}, celdas: {conf.filas * conf.columnas}"
+    # )
+    # escribir(f"lado : {conf.tamaño_celda}, {prueba}", 100, 100)
+    # escribir(f"FPS: {int(reloj.get_fps())}", 100, 140)
 
     canva.fill(bots.color, bots2.rect)
     canva.fill(bots.color, bots.rect)
