@@ -47,7 +47,7 @@ class Tablero(obs.Observador):
         lado = celda.calcularLado(self.rect)
         fil = config.filas
         col = config.columnas
-        sep = config.separacion_celdas
+        sep = int(lado * 0.1)
         pad = config.padding_tablero
         config.tamaño_celda = lado
         config.cambiarConf(notify=False)
@@ -68,14 +68,14 @@ class Tablero(obs.Observador):
                     if cel.esMina:
                         cel.image.fill(config.color_bomba)
                     elif cel.minasAdj > 0:
-                        numero = celda.obtener_fuente().render(str(cel.minasAdj), True, (255, 255, 255))
+                        numero = celda.obtener_fuente(lado).render(str(cel.minasAdj), True, (255, 255, 255))
                         numero_rect = numero.get_rect(
                             center=(cel.image.get_width() // 2, cel.image.get_height() // 2)
                         )
                         cel.image.blit(numero, numero_rect)
                 elif cel.estaMarcada:
                     cel.image.fill((230, 80, 80))
-                    fuente = celda.obtener_fuente()
+                    fuente = celda.obtener_fuente(lado)
                     bandera = fuente.render("P", True, (255, 255, 255))
                     bandera_rect = bandera.get_rect(
                         center=(cel.image.get_width() // 2, cel.image.get_height() // 2)
@@ -105,7 +105,7 @@ class Tablero(obs.Observador):
 
         fil = config.filas
         col = config.columnas
-        sep = config.separacion_celdas
+        sep = int(lado * 0.1)
         pad = config.padding_tablero
         color = config.color_celda
         config.tamaño_celda = lado

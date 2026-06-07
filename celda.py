@@ -5,16 +5,15 @@ import observador as obs
 from adminconf import AdminConf
 
 config = AdminConf()
-_fuente = None
+_fuentes = {}
 
-
-def obtener_fuente():
-    global _fuente
-    if _fuente is None:
+def obtener_fuente(lado=30):
+    size = max(8, int(lado * 0.65))
+    if size not in _fuentes:
         if not font.get_init():
             font.init()
-        _fuente = font.SysFont("timesnewroman", 30)
-    return _fuente
+        _fuentes[size] = font.SysFont("timesnewroman", size, bold=True)
+    return _fuentes[size]
 
 
 class Celda(obs.Observador, Sprite):
@@ -50,7 +49,7 @@ class Celda(obs.Observador, Sprite):
         self.estaAbierta = True
         self.image.fill(config.color_tablero)
         if self.minasAdj > 0:
-            numero = obtener_fuente().render(str(self.minasAdj), True, (255, 255, 255))
+            numero = obtener_fuente(config.tamaño_celda).render(str(self.minasAdj), True, (255, 255, 255))
             numero_rect = numero.get_rect(
                 center=(self.image.get_width() // 2, self.image.get_height() // 2)
             )
@@ -74,7 +73,7 @@ class Celda(obs.Observador, Sprite):
         else:
             self.estaMarcada = True
             self.image.fill((230, 80, 80))
-            fuente = obtener_fuente()
+            fuente = obtener_fuente(config.tamaño_celda)
             bandera = fuente.render("P", True, (255, 255, 255))
             bandera_rect = bandera.get_rect(
                 center=(self.image.get_width() // 2, self.image.get_height() // 2)
@@ -91,10 +90,10 @@ def calcularLado(rp):
 
     fil = config.filas
     col = config.columnas
-    sep = config.separacion_celdas
     pad = config.padding_tablero
+    factor_sep = 0.1
 
-    xlado = (rp.w - sep * (col - 1) - 2 * pad) / col
-    ylado = (rp.h - sep * (fil - 1) - 2 * pad) / fil
+    xlado = (rp.w - 2 * pad) / (col + factor_sep * (col - 1))
+    ylado = (rp.h - 2 * pad) / (fil + factor_sep * (fil - 1))
 
     return int(min(xlado, ylado))
