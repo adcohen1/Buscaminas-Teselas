@@ -186,6 +186,28 @@ while run:
     # escribir(f"lado : {conf.tamaño_celda}, {prueba}", 100, 100)
     # escribir(f"FPS: {int(reloj.get_fps())}", 100, 140)
 
+    # Dibujar HUD
+    fuente_hud = pg.font.SysFont("Arial", 36, bold=True)
+    
+    # Contador de banderas
+    if tablero.minas_creadas:
+        minas_restantes = tablero.num_bombas_generadas - tablero.contar_banderas()
+    else:
+        total_celdas = conf.filas * conf.columnas
+        minas_restantes = max(1 if conf.bombas > 0 else 0, int(total_celdas * (conf.bombas / 100.0)))
+
+    texto_minas = fuente_hud.render(f"Minas: {minas_restantes}", True, (255, 60, 60))
+    rect_minas = texto_minas.get_rect(topleft=(50, 30))
+    canva.blit(texto_minas, rect_minas)
+
+    # Temporizador
+    tiempo = tablero.get_tiempo()
+    minutos = tiempo // 60
+    segundos = tiempo % 60
+    texto_tiempo = fuente_hud.render(f"Tiempo: {minutos:02d}:{segundos:02d}", True, (240, 240, 240))
+    rect_tiempo = texto_tiempo.get_rect(topright=(conf.ancho_pantalla - 50, 30))
+    canva.blit(texto_tiempo, rect_tiempo)
+
     canva.fill(bots.color, bots2.rect)
     canva.fill(bots.color, bots.rect)
     canva.fill(bots.color, botr2.rect)

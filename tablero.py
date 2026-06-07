@@ -20,6 +20,21 @@ class Tablero(obs.Observador):
         self.celdas_mat = []
         self.estado = "JUGANDO"
         self.minas_creadas = False
+        self.tiempo_inicio = None
+        self.tiempo_fin = None
+        self.num_bombas_generadas = 0
+
+    def contar_banderas(self):
+        return sum(1 for fila in self.celdas_mat for cel in fila if cel.estaMarcada)
+
+    def get_tiempo(self):
+        if self.tiempo_inicio is None:
+            return 0
+        if self.estado != "JUGANDO":
+            if self.tiempo_fin is None:
+                self.tiempo_fin = time.time()
+            return int(self.tiempo_fin - self.tiempo_inicio)
+        return int(time.time() - self.tiempo_inicio)
 
     def revelar_minas(self):
         for fila in self.celdas_mat:
@@ -132,6 +147,8 @@ class Tablero(obs.Observador):
             self.celdas_mat.append(fila_celdas)
         self.crearAdyacentes()
         self.minas_creadas = False
+        self.tiempo_inicio = None
+        self.tiempo_fin = None
 
     def generar_minas(self, celda_inicial):
         # 1. Identificar las celdas excluidas (la inicial y sus vecinas)
@@ -158,6 +175,9 @@ class Tablero(obs.Observador):
                 cel.minasAdj = sum([1 for vecino in cel.celdasAdj if vecino.esMina])
 
         self.minas_creadas = True
+        self.tiempo_inicio = time.time()
+        self.tiempo_fin = None
+        self.num_bombas_generadas = num_bombas
 
     def minar(self):
         sprites = self.celdas.sprites()
