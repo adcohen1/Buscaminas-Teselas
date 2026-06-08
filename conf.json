@@ -1,8 +1,8 @@
 {
-    "filas": 18,
-    "columnas": 49,
+    "filas": 12,
+    "columnas": 31,
     "bombas": 20,
-    "tama\u00f1o_celda": 34,
+    "tama\u00f1o_celda": 32,
     "separacion_celdas": 10,
     "margen_tablero": 20,
     "padding_tablero": 20,
@@ -26,6 +26,6 @@
         100,
         10
     ],
-    "ancho_pantalla": 1920,
-    "alto_pantalla": 1080
+    "ancho_pantalla": 1280,
+    "alto_pantalla": 720
 }
