@@ -1,9 +1,9 @@
 import sys
 import pygame as pg
-import main as game
+from interfaz import juego as game
 from componentes.boton import Boton, BotonRenderer
 
-# Obtener variables de configuración y estado desde el módulo main
+# Obtener variables de configuración y estado desde el módulo main/juego
 conf = game.conf
 canva = game.canva
 reloj = game.reloj

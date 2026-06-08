@@ -1,6 +1,6 @@
 import pygame as pg
-import observador as obs
-from adminconf import AdminConf
+import core.observador as obs
+from core.adminconf import AdminConf
 
 config = AdminConf()
 
