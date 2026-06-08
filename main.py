@@ -5,9 +5,9 @@ import threading as thr
 import pygame as pg
 
 import adminconf as ac
-import boton as btn
+from componentes.boton import Boton
 import constantes as c
-import tablero as t
+from componentes.tablero import Tablero, TableroRenderer
 
 # Hacer que la aplicación sea consciente del DPI en Windows para evitar que se cambie la resolución del monitor o se estire
 try:
@@ -56,13 +56,13 @@ r_inicio = 0
 TIEMPO_REINICIO = 5
 
 # items
-tablero = t.Tablero()
+tablero = Tablero()
 tablero.actualizar()
 
-bots = btn.Boton(190, 100, 220, 950)
-bots2 = btn.Boton(190, 100, conf.ancho_pantalla - 220, 950)
-botr = btn.Boton(190, 100, 20, 950)
-botr2 = btn.Boton(190, 100, conf.ancho_pantalla - 420, 950)
+bots = Boton(190, 100, 220, 950)
+bots2 = Boton(190, 100, conf.ancho_pantalla - 220, 950)
+botr = Boton(190, 100, 20, 950)
+botr2 = Boton(190, 100, conf.ancho_pantalla - 420, 950)
 
 conf.agregar(tablero)
 
@@ -70,30 +70,50 @@ vals = list(c.dists.values())
 counter = len(vals) - 1
 game_active = False
 
+
 def run_game(nuevo_juego=True):
-    global run, r_presionado, r_inicio, canva, bg_color, tablero, bots, bots2, botr, botr2, game_active
-    
+    global \
+        run, \
+        r_presionado, \
+        r_inicio, \
+        canva, \
+        bg_color, \
+        tablero, \
+        bots, \
+        bots2, \
+        botr, \
+        botr2, \
+        game_active
+
     # Asegurar que la pantalla esté configurada y caption esté definido
     canva = pg.display.get_surface()
     if canva is None:
-        canva = pg.display.set_mode((conf.ancho_pantalla, conf.alto_pantalla), pg.RESIZABLE)
+        canva = pg.display.set_mode(
+            (conf.ancho_pantalla, conf.alto_pantalla), pg.RESIZABLE
+        )
     pg.display.set_caption("Teselaminas")
-    
+
     bg_color = conf.color_fondo
-    
+
     # Ajustar posición inicial de los botones modificadores de tamaño
     bots.rect.center = (220 + 190 / 2, conf.alto_pantalla - 120 + 100 / 2)
-    bots2.rect.center = (conf.ancho_pantalla - 220 + 190 / 2, conf.alto_pantalla - 120 + 100 / 2)
+    bots2.rect.center = (
+        conf.ancho_pantalla - 220 + 190 / 2,
+        conf.alto_pantalla - 120 + 100 / 2,
+    )
     botr.rect.center = (20 + 190 / 2, conf.alto_pantalla - 120 + 100 / 2)
-    botr2.rect.center = (conf.ancho_pantalla - 420 + 190 / 2, conf.alto_pantalla - 120 + 100 / 2)
-    
+    botr2.rect.center = (
+        conf.ancho_pantalla - 420 + 190 / 2,
+        conf.alto_pantalla - 120 + 100 / 2,
+    )
+
     if nuevo_juego:
         tablero.actualizar()
         tablero.estado = "JUGANDO"
         game_active = True
     else:
         tablero.reposicionar()
-        
+
     run = True
     r_presionado = False
     r_inicio = 0
@@ -117,9 +137,15 @@ def run_game(nuevo_juego=True):
                 tablero.reposicionar()
                 # Reposicionar botones modificadores
                 bots.rect.center = (220 + 190 / 2, conf.alto_pantalla - 120 + 100 / 2)
-                bots2.rect.center = (conf.ancho_pantalla - 220 + 190 / 2, conf.alto_pantalla - 120 + 100 / 2)
+                bots2.rect.center = (
+                    conf.ancho_pantalla - 220 + 190 / 2,
+                    conf.alto_pantalla - 120 + 100 / 2,
+                )
                 botr.rect.center = (20 + 190 / 2, conf.alto_pantalla - 120 + 100 / 2)
-                botr2.rect.center = (conf.ancho_pantalla - 420 + 190 / 2, conf.alto_pantalla - 120 + 100 / 2)
+                botr2.rect.center = (
+                    conf.ancho_pantalla - 420 + 190 / 2,
+                    conf.alto_pantalla - 120 + 100 / 2,
+                )
 
             elif evt.type == pg.KEYDOWN:
                 if evt.key == pg.K_r and not r_presionado:
@@ -143,7 +169,9 @@ def run_game(nuevo_juego=True):
 
                 # Alternar pantalla completa usando NOFRAME
                 elif evt.key == pg.K_f:
-                    es_fullscreen = bool(pg.display.get_surface().get_flags() & pg.NOFRAME)
+                    es_fullscreen = bool(
+                        pg.display.get_surface().get_flags() & pg.NOFRAME
+                    )
                     if not es_fullscreen:
                         conf.ancho_pantalla = info.current_w
                         conf.alto_pantalla = info.current_h
@@ -160,14 +188,28 @@ def run_game(nuevo_juego=True):
                             (conf.ancho_pantalla, conf.alto_pantalla), pg.RESIZABLE
                         )
                     tablero.reposicionar()
-                    bots.rect.center = (220 + 190 / 2, conf.alto_pantalla - 120 + 100 / 2)
-                    bots2.rect.center = (conf.ancho_pantalla - 220 + 190 / 2, conf.alto_pantalla - 120 + 100 / 2)
-                    botr.rect.center = (20 + 190 / 2, conf.alto_pantalla - 120 + 100 / 2)
-                    botr2.rect.center = (conf.ancho_pantalla - 420 + 190 / 2, conf.alto_pantalla - 120 + 100 / 2)
+                    bots.rect.center = (
+                        220 + 190 / 2,
+                        conf.alto_pantalla - 120 + 100 / 2,
+                    )
+                    bots2.rect.center = (
+                        conf.ancho_pantalla - 220 + 190 / 2,
+                        conf.alto_pantalla - 120 + 100 / 2,
+                    )
+                    botr.rect.center = (
+                        20 + 190 / 2,
+                        conf.alto_pantalla - 120 + 100 / 2,
+                    )
+                    botr2.rect.center = (
+                        conf.ancho_pantalla - 420 + 190 / 2,
+                        conf.alto_pantalla - 120 + 100 / 2,
+                    )
             elif evt.type == pg.MOUSEBUTTONUP:
                 if bots.rect.collidepoint(evt.pos):
                     hilo = thr.Thread(
-                        target=conf.__setattr__, args=["filas", conf.filas + 1], daemon=True
+                        target=conf.__setattr__,
+                        args=["filas", conf.filas + 1],
+                        daemon=True,
                     )
                     hilo.start()
 
@@ -181,7 +223,9 @@ def run_game(nuevo_juego=True):
 
                 elif botr.rect.collidepoint(evt.pos):
                     hilo = thr.Thread(
-                        target=conf.__setattr__, args=["filas", conf.filas - 1], daemon=True
+                        target=conf.__setattr__,
+                        args=["filas", conf.filas - 1],
+                        daemon=True,
                     )
                     hilo.start()
 
@@ -211,19 +255,23 @@ def run_game(nuevo_juego=True):
 
         # bot.image.fill(bot.color)
         canva.fill(bg_color)
-        tablero.dibujar(canva)
+        TableroRenderer.dibujar(canva, tablero)
 
         # Dibujar HUD
         fuente_hud = pg.font.SysFont("Arial", 36, bold=True)
-        
+
         # Contador de banderas
         if tablero.minas_creadas:
             minas_restantes = tablero.num_bombas_generadas - tablero.contar_banderas()
         else:
             total_celdas = conf.filas * conf.columnas
-            minas_restantes = max(1 if conf.bombas > 0 else 0, int(total_celdas * (conf.bombas / 100.0)))
+            minas_restantes = max(
+                1 if conf.bombas > 0 else 0, int(total_celdas * (conf.bombas / 100.0))
+            )
 
-        texto_minas = fuente_hud.render(f"Minas: {minas_restantes}", True, (255, 60, 60))
+        texto_minas = fuente_hud.render(
+            f"Minas: {minas_restantes}", True, (255, 60, 60)
+        )
         rect_minas = texto_minas.get_rect(topleft=(50, 30))
         canva.blit(texto_minas, rect_minas)
 
@@ -231,7 +279,9 @@ def run_game(nuevo_juego=True):
         tiempo = tablero.get_tiempo()
         minutos = tiempo // 60
         segundos = tiempo % 60
-        texto_tiempo = fuente_hud.render(f"Tiempo: {minutos:02d}:{segundos:02d}", True, (240, 240, 240))
+        texto_tiempo = fuente_hud.render(
+            f"Tiempo: {minutos:02d}:{segundos:02d}", True, (240, 240, 240)
+        )
         rect_tiempo = texto_tiempo.get_rect(topright=(conf.ancho_pantalla - 50, 30))
         canva.blit(texto_tiempo, rect_tiempo)
 
@@ -243,7 +293,9 @@ def run_game(nuevo_juego=True):
 
         # Barra de progreso al mantener R durante el juego
         if r_presionado and tablero.estado == "JUGANDO":
-            progreso = min((pg.time.get_ticks() - r_inicio) / 1000 / TIEMPO_REINICIO, 1.0)
+            progreso = min(
+                (pg.time.get_ticks() - r_inicio) / 1000 / TIEMPO_REINICIO, 1.0
+            )
             barra_ancho = 300
             barra_alto = 12
             barra_x = (conf.ancho_pantalla - barra_ancho) // 2
@@ -267,7 +319,9 @@ def run_game(nuevo_juego=True):
             # Texto
             fuente_r = pg.font.SysFont("Arial", 18)
             texto_r = fuente_r.render(
-                f"Mantén 'R' para reiniciar ({progreso * 100:.0f}%)", True, (220, 220, 220)
+                f"Mantén 'R' para reiniciar ({progreso * 100:.0f}%)",
+                True,
+                (220, 220, 220),
             )
             rect_r = texto_r.get_rect(
                 center=(conf.ancho_pantalla // 2, barra_y + barra_alto + 18)
@@ -335,4 +389,5 @@ def run_game(nuevo_juego=True):
 
 if __name__ == "__main__":
     import menu
+
     menu.main()

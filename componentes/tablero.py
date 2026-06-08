@@ -1,22 +1,23 @@
 import time
-
-from pygame import Rect, sprite
-
-import celda
-import observador as obs
 import random as ran
+import pygame as pg
+
+import observador as obs
 from adminconf import AdminConf
+from componentes.celda import Celda, CeldaRenderer, calcularLado
 
 config = AdminConf()
 
 
 class Tablero(obs.Observador):
+    """Clase que representa la lógica de negocios y estado del tablero de juego."""
+
     def __init__(self):
         self.width = 0
         self.height = 0
-        self.rect = Rect((0, 0), (1000, 1000))
+        self.rect = pg.Rect((0, 0), (1000, 1000))
         self.color = config.color_tablero
-        self.celdas = sprite.Group()
+        self.celdas = []  # Lista estándar para el bucle de colisiones e iteración
         self.celdas_mat = []
         self.estado = "JUGANDO"
         self.minas_creadas = False
@@ -25,9 +26,11 @@ class Tablero(obs.Observador):
         self.num_bombas_generadas = 0
 
     def contar_banderas(self):
+        """Cuenta el número de banderas colocadas en el tablero."""
         return sum(1 for fila in self.celdas_mat for cel in fila if cel.estaMarcada)
 
     def get_tiempo(self):
+        """Devuelve el tiempo transcurrido en segundos de la partida."""
         if self.tiempo_inicio is None:
             return 0
         if self.estado != "JUGANDO":
@@ -37,12 +40,14 @@ class Tablero(obs.Observador):
         return int(time.time() - self.tiempo_inicio)
 
     def revelar_minas(self):
+        """Revela la posición de todas las minas en el tablero."""
         for fila in self.celdas_mat:
             for cel in fila:
                 if cel.esMina:
                     cel.explotar()
 
     def verificar_victoria(self):
+        """Comprueba si se han abierto todas las celdas seguras."""
         for fila in self.celdas_mat:
             for cel in fila:
                 if not cel.esMina and not cel.estaAbierta:
@@ -50,16 +55,17 @@ class Tablero(obs.Observador):
         return True
 
     def actualizar(self):
+        """Calcula el tamaño y genera las celdas lógicas."""
         self.calcularTamaño()
         self.calcularCeldas()
 
     def reposicionar(self):
-        """Recalcular tamaño y posición de celdas existentes sin reiniciar el juego."""
+        """Recalcular dimensiones y coordenadas lógicas de las celdas sin reiniciar."""
         self.calcularTamaño()
         if not self.celdas_mat:
             return
 
-        lado = celda.calcularLado(self.rect)
+        lado = calcularLado(self.rect)
         fil = config.filas
         col = config.columnas
         sep = int(lado * 0.1)
@@ -76,47 +82,26 @@ class Tablero(obs.Observador):
                 xpos = xspace + pad + j * (lado + sep)
                 ypos = yspace + pad + i * (lado + sep)
 
-                # Recrear la superficie con el nuevo tamaño y redibujar el estado visual
-                cel.image = celda.Surface((lado, lado))
-                if cel.estaAbierta:
-                    cel.image.fill(config.color_tablero)
-                    if cel.esMina:
-                        cel.image.fill(config.color_bomba)
-                    elif cel.minasAdj > 0:
-                        numero = celda.obtener_fuente(lado).render(str(cel.minasAdj), True, (255, 255, 255))
-                        numero_rect = numero.get_rect(
-                            center=(cel.image.get_width() // 2, cel.image.get_height() // 2)
-                        )
-                        cel.image.blit(numero, numero_rect)
-                elif cel.estaMarcada:
-                    cel.image.fill((230, 80, 80))
-                    fuente = celda.obtener_fuente(lado)
-                    bandera = fuente.render("P", True, (255, 255, 255))
-                    bandera_rect = bandera.get_rect(
-                        center=(cel.image.get_width() // 2, cel.image.get_height() // 2)
-                    )
-                    cel.image.blit(bandera, bandera_rect)
-                elif cel.estaExplotada:
-                    cel.image.fill(config.color_bomba)
-                else:
-                    cel.image.fill(cel.color)
-
-                cel.rect = cel.image.get_rect()
-                cel.rect.center = (xpos + lado / 2, ypos + lado / 2)
+                cel.rect.x = xpos
+                cel.rect.y = ypos
+                cel.rect.width = lado
+                cel.rect.height = lado
 
     def calcularTamaño(self):
+        """Calcula el tamaño del contenedor del tablero centrado en pantalla."""
         margen = config.margen_tablero
 
         self.width = config.ancho_pantalla - 2 * margen
         self.height = 0.7 * config.alto_pantalla - 2 * margen
 
-        self.rect = Rect((0, 0), (self.width, self.height))
+        self.rect = pg.Rect((0, 0), (self.width, self.height))
         self.rect.center = (config.ancho_pantalla / 2, config.alto_pantalla / 2)
 
     def calcularCeldas(self):
-        self.celdas.empty()
+        """Crea e inicializa la matriz lógica de celdas."""
+        self.celdas.clear()
         self.celdas_mat = []
-        lado = celda.calcularLado(self.rect)
+        lado = calcularLado(self.rect)
 
         fil = config.filas
         col = config.columnas
@@ -134,15 +119,11 @@ class Tablero(obs.Observador):
             for j in range(col):
                 xpos = xspace + pad + j * (lado + sep)
                 ypos = yspace + pad + i * (lado + sep)
-                cel = celda.Celda(lado, xpos, ypos, color)
-
-                x = xpos + lado / 2
-                y = ypos + lado / 2
-                cel.rect.center = (x, y)
+                cel = Celda(lado, xpos, ypos, color)
 
                 time.sleep(0.0001)
 
-                self.celdas.add(cel)
+                self.celdas.append(cel)
                 fila_celdas.append(cel)
             self.celdas_mat.append(fila_celdas)
         self.crearAdyacentes()
@@ -151,25 +132,28 @@ class Tablero(obs.Observador):
         self.tiempo_fin = None
 
     def generar_minas(self, celda_inicial):
-        # 1. Identificar las celdas excluidas (la inicial y sus vecinas)
+        """Genera minas aleatorias evitando la celda del primer clic y sus vecinas."""
+        # 1. Identificar las celdas excluidas
         excluidas = {celda_inicial}
         for vecino in celda_inicial.celdasAdj:
             excluidas.add(vecino)
 
-        # 2. Obtener lista de celdas disponibles
+        # 2. Celdas disponibles para colocar minas
         disponibles = [
             cel for fila in self.celdas_mat for cel in fila if cel not in excluidas
         ]
 
-        # 3. Colocar las minas de forma aleatoria (config.bombas es el porcentaje, ej. 20 para 20%)
+        # 3. Mezclar y colocar bombas según porcentaje configurado
         total_celdas = config.filas * config.columnas
-        num_bombas_deseadas = max(1 if config.bombas > 0 else 0, int(total_celdas * (config.bombas / 100.0)))
+        num_bombas_deseadas = max(
+            1 if config.bombas > 0 else 0, int(total_celdas * (config.bombas / 100.0))
+        )
         num_bombas = min(num_bombas_deseadas, len(disponibles))
         ran.shuffle(disponibles)
         for i in range(num_bombas):
             disponibles[i].esMina = True
 
-        # 4. Recalcular las minas adyacentes para todas las celdas
+        # 4. Calcular el número de minas vecinas para cada celda
         for fila in self.celdas_mat:
             for cel in fila:
                 cel.minasAdj = sum([1 for vecino in cel.celdasAdj if vecino.esMina])
@@ -180,17 +164,21 @@ class Tablero(obs.Observador):
         self.num_bombas_generadas = num_bombas
 
     def minar(self):
-        sprites = self.celdas.sprites()
+        """Distribuye minas iniciales sin evitar ninguna celda específica."""
+        sprites = list(self.celdas)
         ran.shuffle(sprites)
 
         total_celdas = config.filas * config.columnas
-        num_bombas_deseadas = max(1 if config.bombas > 0 else 0, int(total_celdas * (config.bombas / 100.0)))
+        num_bombas_deseadas = max(
+            1 if config.bombas > 0 else 0, int(total_celdas * (config.bombas / 100.0))
+        )
         num_bombas = min(num_bombas_deseadas, len(sprites))
 
         for i in range(num_bombas):
             sprites[i].esMina = True
 
     def crearAdyacentes(self):
+        """Construye las relaciones de adyacencia de las celdas en el tablero."""
         filas = len(self.celdas_mat)
         cols = len(self.celdas_mat[0])
 
@@ -212,6 +200,13 @@ class Tablero(obs.Observador):
                     [1 for celda in celda_actual.celdasAdj if celda.esMina]
                 )
 
-    def dibujar(self, superficie):
-        superficie.fill(self.color, self.rect)
-        self.celdas.draw(superficie)
+
+class TableroRenderer:
+    """Clase encargada de dibujar el tablero de juego y sus celdas en Pygame."""
+
+    @staticmethod
+    def dibujar(superficie, tablero: Tablero):
+        """Dibuja el fondo del tablero y delega el dibujado de cada celda a CeldaRenderer."""
+        superficie.fill(tablero.color, tablero.rect)
+        for celda in tablero.celdas:
+            CeldaRenderer.dibujar(superficie, celda)
